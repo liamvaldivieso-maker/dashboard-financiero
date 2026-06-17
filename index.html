@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Financiero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0c0c0e;
+    --surface:  #141417;
+    --surface2: #1b1b1f;
+    --border:   #28282e;
+    --border2:  #35353d;
+    --text:     #eeeef0;
+    --muted:    #6b6b78;
+    --subtle:   #424249;
+
+    --green:  #34d399;
+    --red:    #f87171;
+    --amber:  #fbbf24;
+    --blue:   #60a5fa;
+    --purple: #a78bfa;
+    --teal:   #2dd4bf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+
+  /* Brand bar */
+  .brand-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    gap: 0;
+  }
+  .brand-btn {
+    padding: 14px 28px;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .brand-btn:hover { color: var(--text); }
+  .brand-btn.active { color: var(--text); border-bottom-color: var(--brand-color, var(--text)); }
+
+  header {
+    padding: 12px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-color, var(--blue)); }
+  header h1 { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+  header h1 strong { color: var(--text); font-weight: 700; }
+  #last-update { font-size: 0.7rem; color: var(--subtle); }
+  .btn-ghost {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted);
+    border-radius: 6px; padding: 6px 14px; font-size: 0.75rem; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  main { padding: 32px; max-width: 1240px; margin: 0 auto; }
+
+  /* Section label */
+  .section-label {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* KPI Cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 20px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--subtle));
+    border-radius: 10px 10px 0 0;
+  }
+  .card.c-green::before  { background: var(--green);  }
+  .card.c-blue::before   { background: var(--blue);   }
+  .card.c-red::before    { background: var(--red);    }
+  .card.c-amber::before  { background: var(--amber);  }
+  .card.c-purple::before { background: var(--purple); }
+  .card.c-teal::before   { background: var(--teal);   }
+
+  .card-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+  .card-value { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .card-value.c-green  { color: var(--green);  }
+  .card-value.c-blue   { color: var(--blue);   }
+  .card-value.c-red    { color: var(--red);    }
+  .card-value.c-amber  { color: var(--amber);  }
+  .card-value.c-purple { color: var(--purple); }
+  .card-value.c-teal   { color: var(--teal);   }
+  .card-sub { font-size: 0.68rem; color: var(--muted); margin-top: 8px; }
+
+  .kpi-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .kpi-row .card { flex: 1; min-width: 155px; }
+
+  /* Tabs & search */
+  .list-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .tabs { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .tab {
+    background: transparent; border: none; border-radius: 6px;
+    color: var(--muted); padding: 7px 20px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s; letter-spacing: 0.02em;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--surface); color: var(--text); }
+
+  #search {
+    min-width: 200px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem;
+    outline: none; transition: border-color 0.15s;
+  }
+  #search:focus { border-color: var(--border2); }
+  #search::placeholder { color: var(--subtle); }
+
+  /* Quarter sections */
+  .quarter-block { margin-bottom: 32px; }
+  .quarter-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .quarter-label { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  .quarter-stats { display: flex; gap: 20px; font-size: 0.8rem; }
+  .q-stat { color: var(--muted); }
+  .q-stat strong { font-weight: 700; }
+  .q-stat.ing strong { color: var(--green); }
+  .q-stat.ga strong  { color: var(--red);   }
+  .q-stat.irpf strong { color: var(--amber); }
+
+  /* Table */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2); padding: 10px 14px;
+    font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); text-align: left; font-weight: 700;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-top: 1px solid var(--border); cursor: pointer; }
+  tbody tr:hover td { background: var(--surface2); }
+  tbody td { padding: 11px 14px; font-size: 0.84rem; color: var(--text); }
+  tbody tr.detail-row { cursor: default; }
+  tbody tr.detail-row:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 4px;
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge-ing { background: rgba(52,211,153,0.12); color: var(--green); }
+  .badge-ga  { background: rgba(248,113,113,0.12); color: var(--red);  }
+
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.76rem; color: var(--muted); }
+  .empty { text-align: center; padding: 56px 0; color: var(--muted); font-size: 0.875rem; }
+
+  .col-total   { font-weight: 700; }
+  .col-irpf    { }
+  .col-sinirpf { color: var(--green); font-weight: 700; }
+  .col-iva     { color: var(--amber); }
+  .col-siniva  { color: var(--text); }
+
+  .irpf-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(248,113,113,0.1); color: var(--red);
+    padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;
+  }
+  .irpf-pct { font-size: 0.62rem; color: var(--muted); font-weight: 500; }
+
+  .detail-cell { padding: 14px 20px !important; background: var(--surface2) !important; }
+  .detail-grid { display: flex; flex-direction: column; gap: 6px; font-size: 0.79rem; }
+  .detail-row-item { display: flex; gap: 8px; }
+  .detail-lbl { color: var(--muted); width: 130px; flex-shrink: 0; }
+  .detail-val { color: var(--text); }
+  .detail-usd { color: var(--amber); font-size: 0.75rem; }
+
+  /* Spacer */
+  .gap-section { margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <button class="brand-btn active" onclick="setBrand('todas', this)">Total</button>
+  <button class="brand-btn" onclick="setBrand('musica', this)">Eflexx</button>
+  <button class="brand-btn" onclick="setBrand('valdi', this)">Valdi</button>
+</div>
+
+<header>
+  <div class="header-left">
+    <div class="header-dot"></div>
+    <h1 id="header-title"><strong>Total</strong> · Dashboard Financiero</h1>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <span id="last-update"></span>
+    <button class="btn-ghost" onclick="rescan()">Rescanner</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-label" style="color:var(--green);">Ingresos</div>
+  <div class="kpi-row">
+    <div class="card c-teal">
+      <div class="card-label">Facturado bruto</div>
+      <div class="card-value c-teal" id="kpi-bruto-iva">—</div>
+      <div class="card-sub">base + IVA (total emitido)</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-label">Base imponible</div>
+      <div class="card-value c-green" id="kpi-bruto">—</div>
+      <div class="card-sub">sin IVA</div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-label">Beneficio real</div>
+      <div class="card-value c-blue" id="kpi-neto">—</div>
+      <div class="card-sub">base menos retención IRPF</div>
+    </div>
+    <div class="card c-red">
+      <div class="card-label">IRPF retenido</div>
+      <div class="card-value c-red" id="kpi-irpf">—</div>
+      <div class="card-sub">lo retienen tus clientes</div>
+    </div>
+    <div class="card c-amber">
+      <div class="card-label">IVA repercutido</div>
+      <div class="card-value c-amber" id="kpi-iva">—</div>
+      <div class="card-sub">a ingresar a Hacienda</div>
+    </div>
+  </div>
+
+  <div class="gap-section"></div>
+
+  <div class="section-label" style="color:var(--red);">Gastos & Resultado</div>
+  <div class="kpi-row" style="margin-bottom:36px;">
+    <div class="card c-red">
+      <div class="card-label">Total gastos</div>
+      <div class="card-value c-red" id="kpi-gastos">—</div>
+      <div class="card-sub">lo que has gastado</div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-label">Resultado neto</div>
+      <div class="card-value c-purple" id="kpi-resultado">—</div>
+      <div class="card-sub">beneficio real − gastos</div>
+    </div>
+    <div class="card" style="opacity:0.6;">
+      <div class="card-label">IVA pendiente Hacienda</div>
+      <div class="card-value" id="kpi-iva-pendiente" style="color:var(--amber);">—</div>
+      <div class="card-sub">a reservar del resultado</div>
+    </div>
+  </div>
+
+  <div class="list-header">
+    <div class="tabs">
+      <button class="tab active" onclick="setTab('todos', this)">Todos</button>
+      <button class="tab" onclick="setTab('ingreso', this)">Ingresos</button>
+      <button class="tab" onclick="setTab('gasto', this)">Gastos</button>
+    </div>
+    <input type="text" id="search" placeholder="Buscar cliente, factura..." oninput="renderByQuarter()">
+  </div>
+
+  <div id="quarters-container"></div>
+</main>
+
+<script>
+let allFacturas = [];
+let activeBrand = 'todas';
+let activeTab = 'todos';
+
+const brandColors = { todas: '#60a5fa', musica: '#a78bfa', valdi: '#2dd4bf' };
+
+const fmt = n => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+
+function getQuarter(fecha) {
+  if (!fecha) return null;
+  const p = fecha.split('/');
+  return p.length < 3 ? null : Math.ceil(parseInt(p[1]) / 3);
+}
+function getYear(fecha) {
+  if (!fecha) return null;
+  const p = fecha.split('/');
+  return p.length === 3 ? p[2] : null;
+}
+
+function setBrand(marca, btn) {
+  activeBrand = marca;
+  document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const color = brandColors[marca] || '#60a5fa';
+  document.documentElement.style.setProperty('--brand-color', color);
+  const labels = { todas: 'Total', musica: 'Eflexx', valdi: 'Valdi' };
+  document.getElementById('header-title').innerHTML = `<strong>${labels[marca]}</strong> · Dashboard Financiero`;
+  renderAll();
+}
+
+function setTab(tipo, btn) {
+  activeTab = tipo;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderByQuarter();
+}
+
+async function fetchData() {
+  const [facturas] = await Promise.all([
+    fetch('/api/facturas').then(r => r.json()),
+  ]);
+  allFacturas = facturas;
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-ES');
+  renderAll();
+}
+
+function renderAll() {
+  const f = activeBrand === 'todas' ? allFacturas : allFacturas.filter(x => x.marca === activeBrand);
+  const ingresos = f.filter(x => x.tipo === 'ingreso');
+  const gastos = f.filter(x => x.tipo === 'gasto');
+
+  const bruto = ingresos.reduce((s, x) => s + x.subtotal, 0);
+  const iva   = ingresos.reduce((s, x) => s + x.iva, 0);
+  const irpf  = ingresos.reduce((s, x) => s + x.irpf, 0);
+  const totalGastos = gastos.reduce((s, x) => s + x.total, 0);
+
+  const neto = bruto - irpf;
+  const resultado = neto - totalGastos;
+
+  document.getElementById('kpi-bruto-iva').textContent    = fmt(bruto + iva);
+  document.getElementById('kpi-bruto').textContent        = fmt(bruto);
+  document.getElementById('kpi-neto').textContent         = fmt(neto);
+  document.getElementById('kpi-irpf').textContent         = fmt(irpf);
+  document.getElementById('kpi-iva').textContent          = fmt(iva);
+  document.getElementById('kpi-gastos').textContent       = fmt(totalGastos);
+  document.getElementById('kpi-resultado').textContent    = fmt(resultado);
+  document.getElementById('kpi-iva-pendiente').textContent = fmt(iva);
+
+  renderByQuarter();
+}
+
+function renderByQuarter() {
+  const search = document.getElementById('search').value.toLowerCase();
+  let filtered = allFacturas.filter(f => {
+    if (activeBrand !== 'todas' && f.marca !== activeBrand) return false;
+    if (activeTab !== 'todos' && f.tipo !== activeTab) return false;
+    if (search && !`${f.cliente} ${f.proyecto} ${f.numero} ${f.archivo}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const byQ = {};
+  const sinFecha = [];
+  filtered.forEach(f => {
+    const q = getQuarter(f.fecha);
+    const y = getYear(f.fecha);
+    if (!q || !y) { sinFecha.push(f); return; }
+    const key = `${y}-T${q}`;
+    if (!byQ[key]) byQ[key] = [];
+    byQ[key].push(f);
+  });
+
+  const keys = Object.keys(byQ).sort().reverse();
+  if (sinFecha.length) { byQ['Sin fecha'] = sinFecha; keys.push('Sin fecha'); }
+
+  const container = document.getElementById('quarters-container');
+  if (!keys.length) {
+    container.innerHTML = `<div class="empty">Sin facturas en esta vista</div>`;
+    return;
+  }
+
+  container.innerHTML = keys.map(key => {
+    const rows = byQ[key];
+    const totalIngresos = rows.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.subtotal, 0);
+    const totalGastos   = rows.filter(f => f.tipo === 'gasto').reduce((s, f) => s + f.total, 0);
+    const irpfQ         = rows.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.irpf, 0);
+
+    const tableRows = rows.map((f, i) => {
+      const esIngreso = f.tipo === 'ingreso';
+      const badge = esIngreso
+        ? `<span class="badge badge-ing">Ingreso</span>`
+        : `<span class="badge badge-ga">Gasto</span>`;
+      const rowId = `detail-${key.replace(/[\s/]/g,'-')}-${i}`;
+
+      const irpfCell = esIngreso
+        ? `<span class="irpf-badge">−${fmt(f.irpf)} <span class="irpf-pct">${f.irpf_pct}%</span></span>`
+        : `<span style="color:var(--subtle)">—</span>`;
+      const sinIrpfCell = esIngreso
+        ? fmt(f.neto)
+        : `<span style="color:var(--subtle)">—</span>`;
+      const ivaCell = esIngreso ? fmt(f.iva) : `<span style="color:var(--subtle)">—</span>`;
+      const sinIvaCell = esIngreso ? fmt(f.subtotal) : fmt(f.total);
+
+      return `<tr onclick="toggleDetail('${rowId}')">
+        <td>${badge}</td>
+        <td class="mono">${f.numero}</td>
+        <td style="color:var(--muted)">${f.fecha || '—'}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${shortClient(f.cliente)}</td>
+        <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.78rem;">${f.proyecto || '—'}</td>
+        <td class="num col-total">${fmt(f.total)}</td>
+        <td class="num col-iva">${ivaCell}</td>
+        <td class="num col-siniva">${sinIvaCell}</td>
+        <td class="num col-irpf">${irpfCell}</td>
+        <td class="num col-sinirpf">${sinIrpfCell}</td>
+      </tr>
+      <tr id="${rowId}" style="display:none;" class="detail-row">
+        <td colspan="10" class="detail-cell">
+          <div class="detail-grid">
+            <div class="detail-row-item"><span class="detail-lbl">Cliente / Proveedor</span><span class="detail-val">${f.cliente || '—'}</span></div>
+            <div class="detail-row-item"><span class="detail-lbl">Descripción</span><span class="detail-val">${f.proyecto || '—'}</span></div>
+            <div class="detail-row-item"><span class="detail-lbl">Archivo</span><span class="detail-val" style="font-family:monospace;font-size:0.73rem;">${f.archivo}</span></div>
+            ${f.moneda_original && f.moneda_original !== 'EUR' ? `<div class="detail-row-item"><span class="detail-lbl">Importe original</span><span class="detail-usd">${f.total_original} ${f.moneda_original} → ${fmt(f.total)} EUR</span></div>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    const statsHtml = [
+      totalIngresos ? `<span class="q-stat ing">Ingresos <strong>${fmt(totalIngresos)}</strong></span>` : '',
+      totalGastos   ? `<span class="q-stat ga">Gastos <strong>${fmt(totalGastos)}</strong></span>`     : '',
+      irpfQ         ? `<span class="q-stat irpf">IRPF <strong>${fmt(irpfQ)}</strong></span>`           : '',
+    ].filter(Boolean).join('');
+
+    return `
+    <div class="quarter-block">
+      <div class="quarter-header">
+        <div class="quarter-label">${key}</div>
+        <div class="quarter-stats">${statsHtml}</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tipo</th><th>N.º</th><th>Fecha</th><th>Cliente</th><th>Descripción</th>
+            <th class="num">Total c/IVA</th><th class="num">IVA</th><th class="num">Sin IVA</th>
+            <th class="num">IRPF</th><th class="num" style="color:var(--green)">Sin IRPF</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shortClient(name) {
+  if (!name) return '—';
+  const parts = name.split(' ');
+  return parts.length > 3 ? parts.slice(0, 3).join(' ') + '…' : name;
+}
+
+async function rescan() {
+  const btn = event.target;
+  btn.textContent = 'Escaneando...';
+  btn.disabled = true;
+  await fetch('/api/rescan', { method: 'POST' });
+  await fetchData();
+  btn.textContent = 'Rescanner';
+  btn.disabled = false;
+}
+
+function toggleDetail(id) {
+  const row = document.getElementById(id);
+  if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+fetchData();
+setInterval(fetchData, 15000);
+</script>
+</body>
+</html>
