@@ -315,11 +315,14 @@ function setTab(tipo, btn) {
   renderByQuarter();
 }
 
+const SUPABASE_URL = 'https://spncaoukawpyxthdkutz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9CiuyxKXlyAlZUYsfGQsmw_kmwbZ4f-';
+
 async function fetchData() {
-  const [facturas] = await Promise.all([
-    fetch('/api/facturas').then(r => r.json()),
-  ]);
-  allFacturas = facturas;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/facturas?select=*&order=fecha.desc`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  allFacturas = await res.json();
   document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-ES');
   renderAll();
 }
