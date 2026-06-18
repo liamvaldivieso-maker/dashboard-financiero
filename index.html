@@ -202,6 +202,24 @@
 </head>
 <body>
 
+<div id="login-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0c0c0e;">
+  <div style="background:#141417;border:1px solid #28282e;border-radius:12px;padding:40px 36px;width:100%;max-width:340px;text-align:center;">
+    <div style="width:40px;height:40px;background:#60a5fa;border-radius:10px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <p style="color:#6b6b78;font-size:0.8rem;margin-bottom:24px;">Introduce tu contraseña</p>
+    <input id="pwd-input" type="password" placeholder="Contraseña"
+      style="width:100%;background:#0c0c0e;border:1px solid #28282e;border-radius:8px;padding:12px 14px;color:#eeeef0;font-size:0.9rem;outline:none;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')checkLogin()">
+    <button onclick="checkLogin()"
+      style="width:100%;background:#60a5fa;color:#0c0c0e;border:none;border-radius:8px;padding:12px;font-size:0.85rem;font-weight:700;cursor:pointer;">
+      Entrar
+    </button>
+    <p id="login-error" style="color:#f87171;font-size:0.75rem;margin-top:12px;display:none;">Contraseña incorrecta</p>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
 <div class="brand-bar">
   <button class="brand-btn active" onclick="setBrand('todas', this)">Total</button>
   <button class="brand-btn" onclick="setBrand('musica', this)">Eflexx</button>
@@ -479,9 +497,31 @@ function toggleDetail(id) {
   if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
 }
 
-fetchData();
-setInterval(fetchData, 15000);
+const PASSWORD = 'valdi2026';
+
+function checkLogin() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem('auth', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    fetchData();
+    setInterval(fetchData, 15000);
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pwd-input').value = '';
+  }
+}
+
+if (sessionStorage.getItem('auth') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  fetchData();
+  setInterval(fetchData, 15000);
+}
+
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
+</div>
 </body>
 </html>
